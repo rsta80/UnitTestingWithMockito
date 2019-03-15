@@ -4,6 +4,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +24,8 @@ import com.arst80.unittesting.service.ItemBusinessService;
 @RunWith(SpringRunner.class)
 @WebMvcTest(ItemController.class)
 public class ItemControllerTest {
-
 	@Autowired
+	
 	private MockMvc mockMvc;
 
 	@MockBean
@@ -54,6 +56,39 @@ public class ItemControllerTest {
 
 		MvcResult result = mockMvc.perform(request).andExpect(status().isOk())
 				.andExpect(content().json("{\"id\":2,\"name\":\"Square\",\"price\":10}"))
+				.andReturn();
+
+	}
+	
+	@Test
+	public void retrieveAllItems_basic() throws Exception {
+		
+		when(businessService.retreiveHardcodedItem()).thenReturn(new Item(2, "Square", 10, 10));
+
+		RequestBuilder request = MockMvcRequestBuilders.get("/item-from-business-service")
+				.accept(MediaType.APPLICATION_JSON);
+		mockMvc.perform(request);
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk())
+				.andExpect(content().json("{\"id\":2,\"name\":\"Square\",\"price\":10}"))
+				.andReturn();
+
+	}
+	
+	@Test
+	public void retrievefAllItems_basic() throws Exception {
+		
+		when(businessService.retrieveAllItems()).thenReturn(
+				Arrays.asList(new Item(2,"Item2",10,10),
+				new Item(3,"Item3",20,20))
+				);
+
+		RequestBuilder request = MockMvcRequestBuilders.get("/all-items-from-database")
+				.accept(MediaType.APPLICATION_JSON);
+		
+		MvcResult result = mockMvc.perform(request)
+				.andExpect(status().isOk())
+				.andExpect(content().json("[{id:3,name:Item3,price:20},{id:2,name:Item2,price:10}]"))
 				.andReturn();
 
 	}
